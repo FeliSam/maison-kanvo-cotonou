@@ -458,10 +458,7 @@ export default function EditOrderModal() {
                 Nouveau Montant Total TTC Recalculé
               </span>
               <span className="font-serif text-xl font-bold text-luxury-gold">
-                {formatPrice(totalCFA, currency)}{" "}
-                <span className="text-xs text-luxury-muted font-sans font-normal">
-                  ({formatPrice(totalCFA, "XOF")})
-                </span>
+                {formatPrice(totalCFA)}
               </span>
             </div>
 

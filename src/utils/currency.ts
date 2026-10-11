@@ -1,23 +1,7 @@
-import { CurrencyCode } from "@/types";
-
-const RATES: Record<CurrencyCode, number> = {
-  XOF: 1,
-  EUR: 1 / 655.957,
-  USD: 1 / 605.0,
-};
-
-export function formatPrice(amountCFA: number, currency: CurrencyCode = "XOF"): string {
-  if (currency === "XOF") {
-    return `${Math.round(amountCFA)
-      .toString()
-      .replace(/\B(?=(\d{3})+(?!\d))/g, " ")} FCFA`;
-  }
-  if (currency === "EUR") {
-    const val = amountCFA * RATES.EUR;
-    return `${val.toFixed(0)} €`;
-  }
-  const val = amountCFA * RATES.USD;
-  return `$${val.toFixed(0)}`;
+export function formatPrice(amountCFA: number, _currency?: string): string {
+  return `${Math.round(amountCFA)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, " ")} FCFA`;
 }
 
 export function getShippingCostCFA(method: string): number {

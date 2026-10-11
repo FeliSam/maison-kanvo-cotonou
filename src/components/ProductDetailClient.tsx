@@ -241,18 +241,16 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
             <div className="flex items-baseline gap-3 pt-1">
               <span className="font-serif text-2xl sm:text-3xl font-bold text-luxury-gold">
-                {formatPrice(product.priceCFA, currency)}
+                {formatPrice(product.priceCFA)}
               </span>
               {product.originalPriceCFA && (
                 <span className="text-sm line-through text-luxury-muted">
-                  {formatPrice(product.originalPriceCFA, currency)}
+                  {formatPrice(product.originalPriceCFA)}
                 </span>
               )}
-              {currency !== "XOF" && (
-                <span className="text-xs text-luxury-muted">
-                  ({formatPrice(product.priceCFA, "XOF")})
-                </span>
-              )}
+              <span className="text-[11px] uppercase tracking-wider px-2 py-0.5 rounded bg-luxury-surface border border-luxury-border text-luxury-muted font-bold">
+                XOF • TTC
+              </span>
             </div>
           </div>
 

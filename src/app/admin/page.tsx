@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   TrendingUp,
   Package,
@@ -14,6 +15,8 @@ import {
   X,
   Save,
   Layers,
+  Lock,
+  ArrowLeft,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
@@ -50,9 +53,7 @@ const ALL_SIZES: SizeType[] = [
 
 export default function AdminDashboardPage() {
   const dispatch = useAppDispatch();
-  const { orders, products, currency, currentUser } = useAppSelector(
-    (s) => s.app
-  );
+  const { orders, products, currentUser } = useAppSelector((s) => s.app);
 
   const [activeTab, setActiveTab] = useState<"orders" | "catalogue">("orders");
   const [orderSearch, setOrderSearch] = useState("");
@@ -81,12 +82,58 @@ export default function AdminDashboardPage() {
     "Atelier Haie Vive, Cotonou, République du Bénin"
   );
   const [prodCutDetails, setProdCutDetails] = useState("");
-  const [prodCare, setProdCare] = useState("Nettoyage à sec ou lavage main 30°C.");
+  const [prodCare, setProdCare] = useState(
+    "Nettoyage à sec ou lavage main 30°C."
+  );
   const [prodDelivery, setProdDelivery] = useState(
     "Retrait Showroom Cotonou, Coursier Express 3h ou DHL."
   );
   const [prodImages, setProdImages] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState("");
+
+  // Contrôle d'accès strict : Le client n'a pas accès au Dashboard Admin
+  const isAuthorizedStaff =
+    currentUser?.role === "ADMIN_ATELIER" ||
+    currentUser?.role === "DIRECTEUR_BOUTIQUE";
+
+  if (!isAuthorizedStaff) {
+    return (
+      <div className="max-w-xl mx-auto px-4 sm:px-6 py-16 text-center space-y-5">
+        <div className="p-6 sm:p-8 rounded-2xl bg-luxury-card border border-luxury-border shadow-lg space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-500 flex items-center justify-center mx-auto">
+            <Lock className="w-7 h-7" />
+          </div>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-luxury-gold font-bold block">
+            Accès Restreint • Direction & Atelier
+          </span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold">
+            Espace Réservé à l&apos;Administration
+          </h1>
+          <p className="text-xs sm:text-sm text-luxury-muted leading-relaxed">
+            Les comptes <strong>Clients</strong> n&apos;ont pas accès au
+            Dashboard Administrateur. Pour gérer vos commandes ou votre profil,
+            rendez-vous dans votre Espace Client VIP, ou connectez-vous avec un
+            profil <strong>Directeur / Chef d&apos;Atelier</strong>.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <Link
+              href="/conciergerie"
+              className="py-3 px-4 rounded-xl border border-luxury-border bg-luxury-surface text-luxury-text text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 hover:border-luxury-gold"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Mon Espace Client</span>
+            </Link>
+            <Link
+              href="/connexion"
+              className="py-3 px-4 rounded-xl bg-luxury-gold text-white hover:bg-luxury-goldHover text-xs font-bold uppercase tracking-wider flex items-center justify-center"
+            >
+              Changer de Rôle (Admin)
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Statistiques Temps Réel
   const validOrders = orders.filter((o) => o.status !== "Annulée");
@@ -264,10 +311,8 @@ export default function AdminDashboardPage() {
           </h1>
           <p className="text-xs text-luxury-muted mt-1">
             Session active :{" "}
-            <strong className="text-luxury-text">
-              {currentUser?.name || "Maître Codjo Agbessi"}
-            </strong>{" "}
-            • Pilotage temps réel des ventes FCFA et du catalogue.
+            <strong className="text-luxury-text">{currentUser?.name}</strong> •
+            Pilotage temps réel des ventes en FCFA (XOF) et du catalogue.
           </p>
         </div>
 
@@ -301,14 +346,14 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 sm:p-5 rounded-2xl bg-luxury-card border border-luxury-border space-y-1">
           <div className="flex items-center justify-between text-xs text-luxury-muted">
-            <span>Chiffre d&apos;Affaires (TTC)</span>
+            <span>Chiffre d&apos;Affaires (XOF)</span>
             <TrendingUp className="w-4 h-4 text-luxury-gold" />
           </div>
           <div className="font-serif text-xl sm:text-2xl font-bold text-luxury-gold">
-            {formatPrice(totalRevenueCFA, currency)}
+            {formatPrice(totalRevenueCFA)}
           </div>
           <div className="text-[11px] text-luxury-muted">
-            {formatPrice(totalRevenueCFA, "XOF")} hors annulations
+            Total TTC hors annulations
           </div>
         </div>
 
@@ -461,7 +506,7 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                       <span className="font-bold text-luxury-gold shrink-0">
-                        {formatPrice(item.priceCFA * item.quantity, currency)}
+                        {formatPrice(item.priceCFA * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -474,7 +519,7 @@ export default function AdminDashboardPage() {
                       : "Aucune consigne particulière"}
                   </span>
                   <span className="font-serif text-base font-bold text-luxury-gold">
-                    Total TTC : {formatPrice(order.totalCFA, currency)}
+                    Total TTC : {formatPrice(order.totalCFA)}
                   </span>
                 </div>
               </div>
@@ -525,7 +570,7 @@ export default function AdminDashboardPage() {
                       {prod.name}
                     </h3>
                     <p className="text-sm font-bold text-luxury-gold">
-                      {formatPrice(prod.priceCFA, currency)}
+                      {formatPrice(prod.priceCFA)}
                     </p>
                     <p className="text-[11px] text-luxury-muted truncate">
                       Tailles : {prod.sizes.join(", ")}
@@ -753,7 +798,9 @@ export default function AdminDashboardPage() {
                         <button
                           type="button"
                           onClick={() =>
-                            setProdImages(prodImages.filter((_, idx) => idx !== i))
+                            setProdImages(
+                              prodImages.filter((_, idx) => idx !== i)
+                            )
                           }
                           className="absolute top-1 right-1 p-0.5 rounded-full bg-black/80 text-white"
                         >

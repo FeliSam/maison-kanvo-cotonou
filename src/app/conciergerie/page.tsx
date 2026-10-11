@@ -13,11 +13,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import {
-  updateUserProfile,
-  setEditingOrderId,
-  setCurrentUser,
-} from "@/store/appSlice";
+import { updateUserProfile, setEditingOrderId } from "@/store/appSlice";
 import { SizeType } from "@/types";
 import { formatPrice, getDeliveryLabel } from "@/utils/currency";
 import { DEMO_USERS } from "@/data/initialData";
@@ -26,9 +22,12 @@ const SIZES: SizeType[] = ["XS", "S", "M", "L", "XL", "XXL", "Sur-Mesure"];
 
 export default function ConciergerieClientPage() {
   const dispatch = useAppDispatch();
-  const { currentUser, orders, currency } = useAppSelector((s) => s.app);
+  const { currentUser, orders } = useAppSelector((s) => s.app);
 
   const activeUser = currentUser || DEMO_USERS.CLIENT_VIP;
+  const isStaff =
+    activeUser.role === "ADMIN_ATELIER" ||
+    activeUser.role === "DIRECTEUR_BOUTIQUE";
 
   const [name, setName] = useState(activeUser.name);
   const [phone, setPhone] = useState(activeUser.phone);
@@ -69,7 +68,7 @@ export default function ConciergerieClientPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10 overflow-x-hidden">
-      {/* En-tête Espace Client VIP */}
+      {/* En-tête Espace Client VIP (Sans accès Admin pour les clients) */}
       <div className="p-5 sm:p-7 rounded-2xl bg-luxury-card border border-luxury-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -77,8 +76,10 @@ export default function ConciergerieClientPage() {
               <Sparkles className="w-3.5 h-3.5" />
               Espace Client & Conciergerie VIP
             </span>
-            <span className="px-2 py-0.5 rounded bg-luxury-surface border border-luxury-border text-[10px] font-bold">
-              {activeUser.role}
+            <span className="px-2.5 py-0.5 rounded-full bg-luxury-surface border border-luxury-border text-[10px] font-bold">
+              {activeUser.role === "CLIENT_VIP"
+                ? "Membre Cercle d'Or"
+                : activeUser.role}
             </span>
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold">
@@ -91,19 +92,21 @@ export default function ConciergerieClientPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <Link
-            href="/admin"
-            className="px-4 py-2.5 rounded-xl border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
-          >
-            <ShieldCheck className="w-4 h-4" />
-            <span>Dashboard Admin</span>
-          </Link>
+          {isStaff && (
+            <Link
+              href="/admin"
+              className="px-4 py-2.5 rounded-xl border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Dashboard Admin</span>
+            </Link>
+          )}
           <Link
             href="/connexion"
             className="px-4 py-2.5 rounded-xl border border-luxury-border bg-luxury-surface text-xs font-semibold hover:border-luxury-gold flex items-center gap-1.5"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Changer de Rôle</span>
+            <span>Changer de Compte</span>
           </Link>
         </div>
       </div>
@@ -300,10 +303,7 @@ export default function ConciergerieClientPage() {
                           </div>
                         </div>
                         <span className="font-bold text-luxury-gold shrink-0">
-                          {formatPrice(
-                            item.priceCFA * item.quantity,
-                            currency
-                          )}
+                          {formatPrice(item.priceCFA * item.quantity)}
                         </span>
                       </div>
                     ))}
@@ -315,7 +315,7 @@ export default function ConciergerieClientPage() {
                       {order.cityQuarter}
                     </span>
                     <span className="text-sm font-bold text-luxury-gold">
-                      Total TTC : {formatPrice(order.totalCFA, currency)}
+                      Total TTC : {formatPrice(order.totalCFA)}
                     </span>
                   </div>
                 </div>

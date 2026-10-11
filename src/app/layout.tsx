@@ -32,7 +32,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-luxury-bg text-luxury-text overflow-x-hidden">
         <StoreProvider>
           <Navbar />
-          <main className="flex-1 pt-16 sm:pt-20 overflow-x-hidden">
+          <main className="flex-1 pt-16 lg:pt-[112px] overflow-x-hidden">
             {children}
           </main>
           <Footer />

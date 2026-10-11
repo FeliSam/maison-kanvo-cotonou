@@ -10,10 +10,15 @@ import {
   Truck,
   Star,
   MapPin,
+  ShoppingBag,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
-import { useAppSelector } from "@/store/store";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import { addToCartAndOpenCheckout } from "@/store/appSlice";
 import ProductCard from "@/components/ProductCard";
 import { CategoryType } from "@/types";
+import { formatPrice } from "@/utils/currency";
 
 const CATEGORIES: ("Toutes" | CategoryType)[] = [
   "Toutes",
@@ -24,10 +29,15 @@ const CATEGORIES: ("Toutes" | CategoryType)[] = [
 ];
 
 export default function HomePage() {
+  const dispatch = useAppDispatch();
   const { products, reviews } = useAppSelector((s) => s.app);
   const [activeCategory, setActiveCategory] = useState<"Toutes" | CategoryType>(
     "Toutes"
   );
+  const [heroIdx, setHeroIdx] = useState(0);
+
+  const heroProducts = products.slice(0, 3);
+  const activeHeroProduct = heroProducts[heroIdx] || products[0];
 
   const filteredProducts =
     activeCategory === "Toutes"
@@ -36,21 +46,25 @@ export default function HomePage() {
 
   return (
     <div className="space-y-14 sm:space-y-20 overflow-x-hidden">
-      {/* HERO BANNER — Règle de contraste : overlay sombre dégradé + texte clair lisible quel que soit le thème actif */}
-      <section className="relative min-h-[540px] sm:min-h-[640px] flex items-center overflow-hidden">
+      {/* 1. HERO INTERACTIF & STRUCTURÉ (Overlay sombre dégradé + Texte clair garanti) */}
+      <section className="relative min-h-[580px] lg:min-h-[660px] flex items-center overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1800&q=85"
-          alt="Maison Kanvô Cotonou — Couture Contemporaine Bénin"
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          src={
+            activeHeroProduct?.images[0] ||
+            "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1800&q=85"
+          }
+          alt={activeHeroProduct?.name || "Maison Kanvô Cotonou"}
+          className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-700"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/50" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20 w-full">
-          <div className="max-w-2xl space-y-5 text-white">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Colonne Gauche : Éditorial & Actions */}
+          <div className="lg:col-span-7 space-y-5 text-white">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-amber-400/50 backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span className="text-[11px] uppercase tracking-[0.22em] text-amber-300 font-semibold">
-                Cotonou • Haie Vive & Ganhi • République du Bénin
+                Maison de Couture Contemporaine • Cotonou, Bénin
               </span>
             </div>
 
@@ -60,78 +74,157 @@ export default function HomePage() {
 
             <p className="text-sm sm:text-base text-neutral-200 leading-relaxed max-w-xl">
               Silhouettes architecturales taillées à Cotonou : Kanvô royal
-              d&apos;Abomey, lin lavé, coton glacé et bazin riche. Livrées en 3h à
-              Cotonou/Calavi ou expédiées dans le monde entier.
+              tissé main d&apos;Abomey, lin lavé, coton glacé et bazin riche.
+              Remise par coursier en 3h à Cotonou/Calavi ou retrait gratuit au
+              Showroom Haie Vive.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-3 pt-1">
               <Link
                 href="/collections"
                 className="px-6 py-3.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs sm:text-sm uppercase tracking-wider font-bold flex items-center gap-2 transition-colors shadow-lg"
               >
-                <span>Explorer la Collection</span>
+                <span>Découvrir le Catalogue (XOF)</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/sur-mesure"
                 className="px-6 py-3.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/30 text-white text-xs sm:text-sm uppercase tracking-wider font-semibold backdrop-blur-sm transition-colors"
               >
-                Salon Sur-Mesure
+                Salon Sur-Mesure 48h
               </Link>
             </div>
 
-            {/* Indicateurs Clés */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/20 max-w-lg">
-              <div>
-                <div className="font-serif text-xl sm:text-2xl font-bold text-amber-400">
-                  100% Bénin
-                </div>
-                <div className="text-[11px] text-neutral-300">
-                  Tissage Abomey & Atelier Cotonou
-                </div>
-              </div>
-              <div>
-                <div className="font-serif text-xl sm:text-2xl font-bold text-amber-400">
-                  ★ 4.9 / 5
-                </div>
-                <div className="text-[11px] text-neutral-300">
-                  Avis Clients & Photos Portées
-                </div>
-              </div>
-              <div>
-                <div className="font-serif text-xl sm:text-2xl font-bold text-amber-400">
-                  MoMo & Visa
-                </div>
-                <div className="text-[11px] text-neutral-300">
-                  MTN MoMo, Celtiis & Espèces FCFA
-                </div>
+            {/* Sélecteur de Silhouette en Direct */}
+            <div className="pt-4 space-y-2">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-amber-300 font-bold block">
+                Sélectionner une Pièce Phare en Aperçu Direct :
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-xl">
+                {heroProducts.map((hp, index) => (
+                  <button
+                    key={hp.id}
+                    type="button"
+                    onClick={() => setHeroIdx(index)}
+                    className={`p-2.5 rounded-xl border text-left transition-all flex items-center gap-2.5 ${
+                      heroIdx === index
+                        ? "bg-amber-500/25 border-amber-400 text-white shadow-md"
+                        : "bg-black/50 border-white/20 text-neutral-300 hover:border-white/50"
+                    }`}
+                  >
+                    <img
+                      src={hp.images[0]}
+                      alt={hp.name}
+                      className="w-10 h-12 rounded-lg object-cover shrink-0 border border-white/20"
+                    />
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold truncate text-white">
+                        {hp.name}
+                      </div>
+                      <div className="text-[11px] font-extrabold text-amber-400">
+                        {formatPrice(hp.priceCFA)}
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
+
+          {/* Colonne Droite : Carte Interactive de la Silhouette Active */}
+          {activeHeroProduct && (
+            <div className="lg:col-span-5">
+              <div className="p-5 rounded-2xl bg-black/75 border border-white/20 backdrop-blur-md text-white space-y-4 shadow-2xl">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
+                    {activeHeroProduct.category}
+                  </span>
+                  <span className="text-xs font-bold text-amber-400 flex items-center gap-1">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    {activeHeroProduct.rating.toFixed(1)} / 5
+                  </span>
+                </div>
+
+                <div className="flex gap-4 items-center">
+                  <img
+                    src={activeHeroProduct.images[0]}
+                    alt={activeHeroProduct.name}
+                    className="w-24 h-32 sm:w-28 sm:h-36 rounded-xl object-cover border border-white/20 shrink-0"
+                  />
+                  <div className="space-y-1.5 min-w-0">
+                    <h2 className="font-serif text-lg sm:text-xl font-bold text-white leading-snug">
+                      {activeHeroProduct.name}
+                    </h2>
+                    <p className="text-xs text-neutral-300 line-clamp-2">
+                      {activeHeroProduct.subtitle}
+                    </p>
+                    <div className="text-xl font-extrabold text-amber-400 pt-1">
+                      {formatPrice(activeHeroProduct.priceCFA)}
+                    </div>
+                    <p className="text-[11px] text-neutral-300">
+                      Tailles : {activeHeroProduct.sizes.join(" • ")}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-white/15">
+                  <Link
+                    href={`/collections/${activeHeroProduct.slug}`}
+                    className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold text-center transition-colors"
+                  >
+                    Détails & Photos
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      dispatch(
+                        addToCartAndOpenCheckout({
+                          product: activeHeroProduct,
+                          size: activeHeroProduct.sizes[0] || "M",
+                          color:
+                            activeHeroProduct.colors[0]?.name || "Classique",
+                          quantity: 1,
+                          openDrawer: true,
+                        })
+                      )
+                    }
+                    className="py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-md"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    <span>Commander</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* PILIERS DE LA MAISON */}
+      {/* 2. BARRE DES ENGAGEMENTS MAISON KANVÔ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
               icon: Scissors,
+              step: "01",
               title: "Étoffes Nobles du Bénin",
-              desc: "Kanvô tissé main, coton bio peigné, lin frais et bazin riche glacé.",
+              desc: "Kanvô tissé main d'Abomey, coton bio peigné, lin frais et bazin riche glacé.",
             },
             {
               icon: Truck,
+              step: "02",
               title: "Coursier Express 3h",
               desc: "Livraison directe à Haie Vive, Ganhi, Cocotiers, Fidjrossè, Calavi & Porto-Novo.",
             },
             {
               icon: ShieldCheck,
+              step: "03",
               title: "Modification Libre",
               desc: "Changez la taille, la nuance ou le créneau de livraison en 1 clic avant remise.",
             },
             {
               icon: MapPin,
+              step: "04",
               title: "Retouches Offertes",
               desc: "Essayage privé et ajustement d'ourlet gratuit en 2h dans nos 2 showrooms.",
             },
@@ -140,53 +233,71 @@ export default function HomePage() {
             return (
               <div
                 key={idx}
-                className="p-4 sm:p-5 rounded-xl bg-luxury-card border border-luxury-border flex items-start gap-3.5"
+                className="p-5 rounded-2xl bg-luxury-card border border-luxury-border hover:border-luxury-gold transition-colors space-y-2.5 shadow-sm"
               >
-                <div className="p-2.5 rounded-lg bg-luxury-surface border border-luxury-border text-luxury-gold shrink-0">
-                  <Icon className="w-5 h-5" />
+                <div className="flex items-center justify-between">
+                  <div className="p-2.5 rounded-xl bg-luxury-surface border border-luxury-border text-luxury-gold">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <span className="font-serif text-xs font-bold text-luxury-gold px-2.5 py-0.5 rounded-full bg-luxury-surface border border-luxury-border">
+                    Engagement {item.step}
+                  </span>
                 </div>
-                <div>
-                  <h2 className="font-serif text-sm sm:text-base font-bold text-luxury-text">
-                    {item.title}
-                  </h2>
-                  <p className="text-xs text-luxury-muted mt-1 leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
+                <h2 className="font-serif text-base font-bold text-luxury-text">
+                  {item.title}
+                </h2>
+                <p className="text-xs text-luxury-muted leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* SÉLECTION DU SHOWROOM */}
+      {/* 3. CATALOGUE INTERACTIF DU SHOWROOM (TARIFS EXCLUSIFS EN FCFA / XOF) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="p-5 sm:p-6 rounded-2xl bg-luxury-card border border-luxury-border flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <span className="text-xs uppercase tracking-[0.2em] text-luxury-gold font-bold">
-              Vestiaire Contemporain • Prix en FCFA
+              Vestiaire Contemporain • Prix Officiels en FCFA (XOF)
             </span>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-luxury-text mt-1">
               Pièces Signatures du Showroom
             </h2>
           </div>
 
-          {/* Filtres rapides par catégorie */}
-          <div className="flex flex-wrap gap-1.5">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
-                  activeCategory === cat
-                    ? "bg-luxury-gold text-white border-luxury-gold"
-                    : "bg-luxury-card text-luxury-text border-luxury-border hover:border-luxury-gold"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          {/* Filtres par catégorie avec compteur dynamique */}
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((cat) => {
+              const count =
+                cat === "Toutes"
+                  ? products.length
+                  : products.filter((p) => p.category === cat).length;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                    activeCategory === cat
+                      ? "bg-luxury-gold text-white border-luxury-gold shadow-sm"
+                      : "bg-luxury-surface text-luxury-text border-luxury-border hover:border-luxury-gold"
+                  }`}
+                >
+                  <span>{cat}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                      activeCategory === cat
+                        ? "bg-black/30 text-white"
+                        : "bg-luxury-card text-luxury-muted"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -200,55 +311,106 @@ export default function HomePage() {
         <div className="text-center pt-2">
           <Link
             href="/collections"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white text-xs uppercase tracking-wider font-bold transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border-2 border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-white text-xs uppercase tracking-wider font-bold transition-colors"
           >
-            <span>Accéder au Catalogue Complet & Filtres Avancés</span>
+            <span>Accéder au Catalogue Complet & Filtres par Taille</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
 
-      {/* BANNIÈRE SUR-MESURE & KANVÔ (Règle de contraste : overlay sombre dégradé + texte clair lisible) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="relative rounded-2xl overflow-hidden min-h-[340px] flex items-center p-6 sm:p-12">
+      {/* 4. PARCOURS SAVOIR-FAIRE & SHOWROOMS COTONOU */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Bannière Sur-Mesure 48h */}
+        <div className="lg:col-span-7 relative rounded-2xl overflow-hidden min-h-[360px] flex items-center p-6 sm:p-10">
           <img
-            src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1600&q=85"
+            src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1400&q=85"
             alt="Atelier Sur-Mesure Cotonou"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/80 to-black/45" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/45" />
 
-          <div className="relative z-10 max-w-xl space-y-4 text-white">
+          <div className="relative z-10 max-w-lg space-y-4 text-white">
             <span className="text-xs uppercase tracking-[0.22em] text-amber-400 font-bold">
-              Salon Privé Haie Vive & Ganhi
+              Salon Privé de Couture • Cotonou
             </span>
             <h2 className="font-serif text-2xl sm:text-4xl font-bold text-white">
               Confection Sur-Mesure en 48 Heures.
             </h2>
             <p className="text-xs sm:text-sm text-neutral-200 leading-relaxed">
-              Choisissez votre tissage Kanvô d&apos;Abomey ou votre lin lavé,
+              Sélectionnez votre étoffe Kanvô d&apos;Abomey ou votre lin lavé,
               confiez vos mensurations à notre Maître Tailleur et recevez une
-              pièce unique façonnée à vos mesures exactes.
+              création façonnée à vos mesures exactes.
             </p>
             <div className="pt-2 flex flex-wrap gap-3">
               <Link
                 href="/sur-mesure"
                 className="px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs uppercase tracking-wider font-bold transition-colors"
               >
-                Réserver un Essayage ou Sur-Mesure
+                Réserver un Essayage
               </Link>
               <Link
                 href="/suivi"
                 className="px-5 py-3 rounded-xl bg-white/15 hover:bg-white/25 border border-white/30 text-white text-xs uppercase tracking-wider font-semibold backdrop-blur-sm transition-colors"
               >
-                Suivre ou Modifier une Commande
+                Suivre une Commande
               </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Nos 2 Adresses à Cotonou */}
+        <div className="lg:col-span-5 p-6 rounded-2xl bg-luxury-card border border-luxury-border flex flex-col justify-between space-y-5">
+          <div className="space-y-1">
+            <span className="text-xs uppercase tracking-[0.2em] text-luxury-gold font-bold">
+              Nos 2 Adresses à Cotonou
+            </span>
+            <h3 className="font-serif text-xl sm:text-2xl font-bold">
+              Showrooms & Essayage Privé
+            </h3>
+          </div>
+
+          <div className="space-y-3">
+            <div className="p-4 rounded-xl bg-luxury-surface border border-luxury-border space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-serif font-bold text-sm text-luxury-text">
+                  1. Flagship Haie Vive
+                </span>
+                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-luxury-gold text-white">
+                  Principal
+                </span>
+              </div>
+              <p className="text-xs text-luxury-muted">
+                Rue des Cocotiers, à 150m de la Place du Souvenir, Cotonou.
+              </p>
+              <p className="text-[11px] font-semibold text-luxury-gold flex items-center gap-1 pt-1">
+                <Clock className="w-3.5 h-3.5" />
+                Lun – Sam : 09h00 – 20h30 • Retrait Gratuit
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-luxury-surface border border-luxury-border space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-serif font-bold text-sm text-luxury-text">
+                  2. Galerie Ganhi
+                </span>
+                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-luxury-border bg-luxury-card">
+                  Quartier d&apos;Affaires
+                </span>
+              </div>
+              <p className="text-xs text-luxury-muted">
+                Avenue Steinmetz, Immeuble Horizon, Ganhi, Cotonou.
+              </p>
+              <p className="text-[11px] font-semibold text-luxury-gold flex items-center gap-1 pt-1">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Retouches express offertes en 2 heures
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* APERÇU AVIS CLIENTS & PHOTOS PORTÉES */}
+      {/* 5. AVIS CLIENTS VÉRIFIÉS & PHOTOS PORTÉES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
           <div>
@@ -267,7 +429,7 @@ export default function HomePage() {
             return (
               <div
                 key={rev.id}
-                className="p-4 sm:p-5 rounded-xl bg-luxury-card border border-luxury-border flex flex-col justify-between gap-4"
+                className="p-5 rounded-2xl bg-luxury-card border border-luxury-border flex flex-col justify-between gap-4 shadow-sm"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -286,7 +448,7 @@ export default function HomePage() {
                         {rev.rating.toFixed(1)}
                       </span>
                     </div>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-luxury-surface border border-luxury-border font-medium">
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-luxury-surface border border-luxury-border font-bold">
                       Taille {rev.orderedSize}
                     </span>
                   </div>
@@ -307,9 +469,9 @@ export default function HomePage() {
                     {prod && (
                       <Link
                         href={`/collections/${prod.slug}`}
-                        className="text-[11px] text-luxury-gold hover:underline font-medium block mt-0.5"
+                        className="text-[11px] text-luxury-gold hover:underline font-semibold block mt-0.5"
                       >
-                        Voir : {prod.name}
+                        Pièce : {prod.name}
                       </Link>
                     )}
                   </div>

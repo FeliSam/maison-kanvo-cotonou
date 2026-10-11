@@ -3,10 +3,16 @@
 import React from "react";
 import Link from "next/link";
 import { MapPin, Phone, Clock, ShieldCheck, Sparkles } from "lucide-react";
+import { useAppSelector } from "@/store/store";
 
 export default function Footer() {
+  const currentUser = useAppSelector((s) => s.app.currentUser);
+  const isStaff =
+    currentUser?.role === "ADMIN_ATELIER" ||
+    currentUser?.role === "DIRECTEUR_BOUTIQUE";
+
   return (
-    <footer className="border-t border-luxury-border bg-luxury-card text-luxury-text pb-20 lg:pb-10 mt-16">
+    <footer className="border-t border-luxury-border bg-luxury-card text-luxury-text pb-24 lg:pb-10 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {/* Colonne 1 : Identité */}
         <div className="space-y-3">
@@ -47,7 +53,7 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Colonne 3 : Navigation rapide */}
+        {/* Colonne 3 : Navigation rapide (sans lien Admin pour les clients) */}
         <div className="space-y-2.5 text-sm">
           <h3 className="text-xs uppercase tracking-[0.18em] font-bold text-luxury-gold">
             Maison & Services
@@ -85,21 +91,23 @@ export default function Footer() {
                 Espace Client VIP & Mensurations
               </Link>
             </li>
-            <li>
-              <Link
-                href="/admin"
-                className="hover:text-luxury-gold transition-colors"
-              >
-                Portail Direction & Chef d&apos;Atelier
-              </Link>
-            </li>
+            {isStaff && (
+              <li>
+                <Link
+                  href="/admin"
+                  className="text-luxury-gold font-semibold hover:underline transition-colors"
+                >
+                  Dashboard Direction & Chef d&apos;Atelier
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
 
         {/* Colonne 4 : Paiements & Livraison Bénin */}
         <div className="space-y-3 text-sm">
           <h3 className="text-xs uppercase tracking-[0.18em] font-bold text-luxury-gold">
-            Conciergerie & Règlement
+            Conciergerie & Règlement (FCFA)
           </h3>
           <p className="flex items-center gap-2 text-luxury-muted">
             <Phone className="w-4 h-4 text-luxury-gold shrink-0" />
@@ -116,7 +124,7 @@ export default function Footer() {
               Visa / Mastercard
             </span>
             <span className="px-2.5 py-1 text-[11px] font-semibold rounded bg-luxury-surface border border-luxury-border">
-              Espèces FCFA
+              Espèces FCFA (XOF)
             </span>
           </div>
           <p className="text-xs text-luxury-muted flex items-center gap-1.5 pt-1">
